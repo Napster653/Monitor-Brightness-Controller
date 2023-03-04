@@ -3,6 +3,7 @@ from typing import List
 import monitorcontrol
 import pystray
 from PIL import Image
+import pkg_resources
 
 
 def set_brightness(brightness: int, monitors: List[monitorcontrol.Monitor]):
@@ -78,7 +79,7 @@ def exit_program(icon: pystray.Icon):
     icon.stop()
 
 
-def setup_menu(icon, monitors: List[monitorcontrol.Monitor]) -> pystray.Menu:
+def setup_menu(monitors: List[monitorcontrol.Monitor]) -> pystray.Menu:
     menu = pystray.Menu(
         pystray.MenuItem(text=lambda text: get_brightness(monitors=monitors), action=None, enabled=False),
         pystray.Menu.SEPARATOR,
@@ -93,8 +94,8 @@ def setup_menu(icon, monitors: List[monitorcontrol.Monitor]) -> pystray.Menu:
 
 def main():
     monitors = monitorcontrol.get_monitors()
-    icon = Image.open('icon.png')
-    menu = setup_menu(icon=icon, monitors=monitors)
+    icon = Image.open(pkg_resources.resource_filename(__name__, 'icon.png'))
+    menu = setup_menu(monitors=monitors)
     icon = pystray.Icon(name='Monitor Brightness Controller', icon=icon, title='Monitor Brightness Controller v0.1',
                         menu=menu)
     icon.run()
