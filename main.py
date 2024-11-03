@@ -1,12 +1,15 @@
+"""
+Monitor Brightness Controller
+"""
 from typing import List
 
 import monitorcontrol
+import pkg_resources
 import pystray
 from PIL import Image
-import pkg_resources
 
 
-def set_brightness(brightness: int, monitors: List[monitorcontrol.Monitor]):
+def set_brightness(brightness: int, monitors: List[monitorcontrol.Monitor]) -> None:
     """
     Sets the brightness of all monitors in the list to the desired value
     :param monitors: The list of monitors
@@ -18,7 +21,7 @@ def set_brightness(brightness: int, monitors: List[monitorcontrol.Monitor]):
             monitor.set_luminance(brightness)
 
 
-def get_brightness(monitors: List[monitorcontrol.Monitor]):
+def get_brightness(monitors: List[monitorcontrol.Monitor]) -> str:
     """
     Returns the brightness of the first monitor.
     It is assumed that all monitors will have the same value.
@@ -32,46 +35,7 @@ def get_brightness(monitors: List[monitorcontrol.Monitor]):
             return f'Brightness at {brightness}%'
 
 
-def indirect_set_brightness_100(monitors: List[monitorcontrol.Monitor]):
-    """
-    Sets brightness to 100%
-    :param monitors: The list of monitors
-    :return: A callable to the function
-    """
-
-    def set_brightness_100():
-        set_brightness(brightness=100, monitors=monitors)
-
-    return set_brightness_100
-
-
-def indirect_set_brightness_50(monitors: List[monitorcontrol.Monitor]):
-    """
-    Sets brightness to 100%
-    :param monitors: The list of monitors
-    :return: A callable to the function
-    """
-
-    def set_brightness_50():
-        set_brightness(brightness=50, monitors=monitors)
-
-    return set_brightness_50
-
-
-def indirect_set_brightness_0(monitors: List[monitorcontrol.Monitor]):
-    """
-    Sets brightness to 100%
-    :param monitors: The list of monitors
-    :return: A callable to the function
-    """
-
-    def set_brightness_0():
-        set_brightness(brightness=0, monitors=monitors)
-
-    return set_brightness_0
-
-
-def exit_program(icon: pystray.Icon):
+def exit_program(icon: pystray.Icon) -> None:
     """
     Stops the menu and makes the program end
     :param icon: the pystray Icon
@@ -80,24 +44,31 @@ def exit_program(icon: pystray.Icon):
 
 
 def setup_menu(monitors: List[monitorcontrol.Monitor]) -> pystray.Menu:
+    """
+    Sets up the menu with the desired options
+    :param monitors: The list of monitors
+    :return: The menu
+    """
     menu = pystray.Menu(
         pystray.MenuItem(text=lambda text: get_brightness(monitors=monitors), action=None, enabled=False),
         pystray.Menu.SEPARATOR,
-        pystray.MenuItem(text='Set brightness to 100%', action=indirect_set_brightness_100(monitors)),
-        pystray.MenuItem(text='Set brightness to 50%', action=indirect_set_brightness_50(monitors)),
-        pystray.MenuItem(text='Set brightness to 0%', action=indirect_set_brightness_0(monitors)),
+        pystray.MenuItem(text='Set brightness to 100%', action=lambda: set_brightness(100, monitors)),
+        pystray.MenuItem(text='Set brightness to 50%', action=lambda: set_brightness(50, monitors)),
+        pystray.MenuItem(text='Set brightness to 0%', action=lambda: set_brightness(0, monitors)),
         pystray.Menu.SEPARATOR,
-        pystray.MenuItem(text='Exit', action=exit_program)
+        pystray.MenuItem(text='Exit', action=exit_program),
     )
     return menu
 
 
-def main():
+def main() -> None:
+    """
+    Main function
+    """
     monitors = monitorcontrol.get_monitors()
     icon = Image.open(pkg_resources.resource_filename(__name__, 'icon.png'))
     menu = setup_menu(monitors=monitors)
-    icon = pystray.Icon(name='Monitor Brightness Controller', icon=icon, title='Monitor Brightness Controller v0.1',
-                        menu=menu)
+    icon = pystray.Icon(name='Monitor Brightness Controller', icon=icon, title='Monitor Brightness Controller v0.2', menu=menu)
     icon.run()
 
 
